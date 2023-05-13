@@ -94,25 +94,20 @@ class PuppeteerWrapper {
         await this.page.setViewport({ width, height });
     }
 
-    async saveCookie(cookies, path) {
-        // Save the provided cookies to a file for future use
-        const serializedCookies = cookies.map((cookie) => JSON.stringify(cookie));
-        fs.writeFileSync(path, JSON.stringify(serializedCookies));
+
+    async saveCookies(filePath) {
+        const cookies = await this.page.cookies();
+        fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
     }
 
-    async loadCookie(path) {
-        // Load the cookies from the file
-        const cookiePath = path;
-        if (fs.existsSync(cookiePath)) {
-            const serializedCookies = JSON.parse(fs.readFileSync(cookiePath));
-            const cookies = serializedCookies.map((serializedCookie) =>
-                JSON.parse(serializedCookie)
-            );
+
+    async getCookies(filePath) {
+        if (fs.existsSync(filePath)) {
+            const cookies = JSON.parse(fs.readFileSync(filePath));
             return cookies;
-        } else {
-            return null;
         }
     }
+    
     async fillForm(selectorMap) {
         const firstSelector = Object.keys(selectorMap)[0];
         console.log(firstSelector);

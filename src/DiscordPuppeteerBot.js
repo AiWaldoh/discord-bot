@@ -1,7 +1,7 @@
 const PuppeteerWrapper = require('./PuppeteerWrapper');
 const OpenAIChatBot = require('./OpenAIChatBot');
 const EventEmitter = require('events');
-class MessageEmitter extends EventEmitter {}
+class MessageEmitter extends EventEmitter { }
 
 class DiscordPuppeteerBot extends PuppeteerWrapper {
 
@@ -12,7 +12,7 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
         this.messageEmitter = messageEmitter;
     }
 
-    
+
     async listenForMessages(keyword) {
         // Instantiate the OpenAIChatBot
         const chatbot = new OpenAIChatBot();
@@ -64,28 +64,37 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
         await this.fillForm(selectorMap);
         await this.clickButton('button[type="submit"]');
         await this.waitForElement('[class^="unreadMentionsIndicatorTop-"]');
-
-        const cookies = await this.page.cookies();
-        this.saveCookie(cookies, this.cookiePath);
+        // this.saveCookies(this.cookiePath);
     }
 
-    async loginWithCookie(cookie) {
+    async loginWithCookies(cookies) {
         // Navigate to the website
-        console.log(cookie);
+
         // Set the cookie for authentication
-        await this.page.setCookie(cookie);
+        for (let cookie of cookies) {
+            await this.page.setCookie(cookie);
+        }
+        await this.goto(`${this.url}/channels/@me`);
+        // await this.page.waitForTimeout(1000);
+        // const buttons = await this.page.$$('button');
+
+        // // Click the second button
+        // if (buttons.length > 1) {
+        //     await buttons[1].click();
+        // } else {
+        //     console.log("There aren't enough buttons on the page.");
+        // }
     }
 
     async discordLogin(username, password) {
         await this.goto(`${this.url}/login`);
-        const cookie = await this.loadCookie(this.cookiePath);
-
-        if (cookie) {
+        const cookies = await this.getCookies(this.cookiePath);
+        
+        if (cookies) {
             // A cookie exists, so log in using the cookie
-            //await this.loginWithCookie(cookie);
-
-            //TODO: fix this
+            //await this.loginWithCookies(cookies);
             await this.loginWithCredentials(username, password);
+
         } else {
             // No cookie found, so perform regular login
             await this.loginWithCredentials(username, password);

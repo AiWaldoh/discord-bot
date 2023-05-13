@@ -22,7 +22,7 @@ class BotRunner {
         try {
             // Log in to Discord
             await this.bot.discordLogin(username, password);
-
+            console.log(`logged in!`);
             // Send a text message to the specified channel
             await this.bot.goto(channelUrl);
             await this.bot.waitForElement('div[role="textbox"]');

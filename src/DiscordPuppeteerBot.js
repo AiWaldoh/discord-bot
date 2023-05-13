@@ -3,14 +3,13 @@ const OpenAIChatBot = require('./OpenAIChatBot');
 const EventEmitter = require('events');
 class MessageEmitter extends EventEmitter {}
 
-const messageEmitter = new MessageEmitter();
-
 class DiscordPuppeteerBot extends PuppeteerWrapper {
 
-    constructor(url, cookiePath) {
+    constructor(url, cookiePath, messageEmitter) {
         super();
         this.url = url;
         this.cookiePath = cookiePath;
+        this.messageEmitter = messageEmitter;
     }
 
     
@@ -23,14 +22,14 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
             console.log(message);
             if (message.startsWith(keyword)) {
                 console.log(`Keyword found in message: ${message}`);
-
+                message = message.split("@Wendah")[1];
                 // Use the chatbot to send a message and get a response
                 chatbot.send_message(message);
                 const response = await chatbot.get_response();
 
                 console.log(`ChatBot response: ${response}`);
 
-                messageEmitter.emit('response', response);
+                this.messageEmitter.emit('response', response);
             }
         });
 
@@ -95,7 +94,7 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
 
     async sendTextMessage(channelUrl, message) {
         console.log(`sending text message to channel ${channelUrl}`);
-        await this.goto(channelUrl);
+        //await this.goto(channelUrl);
         await this.waitForElement('div[role="textbox"]');
         await this.page.type('div[role="textbox"]', message);
         await this.page.keyboard.press('Enter');

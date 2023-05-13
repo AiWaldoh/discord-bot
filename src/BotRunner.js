@@ -39,9 +39,10 @@ class BotRunner {
     }
 
     handleResponse(response) {
+        const channelUrl = this.env.get('DISCORD_CHANNEL_URL');
         console.log('Received a response from the chatbot:', response);
         // This is an example, you should replace 'channelUrl' with actual value
-        this.bot.sendTextMessage('channelUrl', response);
+        this.bot.sendTextMessage(channelUrl, response);
     }
 }
 

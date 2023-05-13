@@ -40,7 +40,7 @@ class OpenAIChatBot {
             this.total_tokens_used.push(usage.total_tokens);
 
             this.messages.push({ "role": "assistant", "content": response.data.choices[0].message.content});
-            console.log(response.data.choices[0].message.content);
+            
             return response.data.choices[0].message.content;
         } catch (error) {
             if (error.response) {

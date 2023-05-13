@@ -27,7 +27,7 @@ class BotRunner {
 
         try {
             // Log in to Discord
-            //await this.bot.discordLogin(username, password);
+            await this.bot.discordLogin(username, password);
             console.log(`logged in!`);
 
             // Go to listening channel

@@ -24,12 +24,13 @@ class OpenAIChatBot {
         this.messages.push({ role: "user", content: message });
     }
 
-    async get_response(temperature = 0.7, presence_penalty = 0, frequency_penalty = 0, n = 1) {
+    async get_response(temperature = 0.9, presence_penalty = 0, frequency_penalty = 0, n = 1) {
         let response;
         try {
             response = await this.openai.createChatCompletion({
                 model: this.model,
-                messages: this.messages
+                messages: this.messages,
+                temperature: temperature,
             });
             const usage = response.data.usage;
             this.prompt_tokens_used.push(usage.prompt_tokens);

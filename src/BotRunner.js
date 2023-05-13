@@ -1,11 +1,11 @@
 const EnvWrapper = require('./EnvWrapper');
 const DiscordPuppeteerBot = require('./DiscordPuppeteerBot');
-const MessageEmitter = require('events');
-
+const { EventEmitter } = require('events');
+const OpenAIChatBot = require('./OpenAIChatBot');
 class BotRunner {
     constructor() {
         this.env = new EnvWrapper();
-        this.messageEmitter = new MessageEmitter();
+        this.messageEmitter = new EventEmitter();
     }
 
     async runBot() {
@@ -13,24 +13,34 @@ class BotRunner {
         const password = this.env.get('DISCORD_PASSWORD');
         const channelUrl = this.env.get('DISCORD_CHANNEL_URL');
         const nickname = this.env.get("DISCORD_NICKNAME");
-        const cookiesPath = './cookies/discord-cookie.json';
+        const cookiesPath = './browserState/discord-data.json';
+        // Instantiate the OpenAIChatBot
+        let chatbot = new OpenAIChatBot();
+        chatbot.set_role(this.env.get("OPENAI_INITIAL_MESSAGE"));
+        const context = this.env.get("OPENAI_CONTEXT");
 
+        chatbot.send_message(context);
 
         this.bot = new DiscordPuppeteerBot('https://discord.com', cookiesPath, this.messageEmitter);
+
         await this.bot.init();
 
         try {
             // Log in to Discord
-            await this.bot.discordLogin(username, password);
+            //await this.bot.discordLogin(username, password);
             console.log(`logged in!`);
-            // Send a text message to the specified channel
+
+            // Go to listening channel
             await this.bot.goto(channelUrl);
+            //wait for channel to load
             await this.bot.waitForElement('div[role="textbox"]');
+
+            // Send a message
             //await this.bot.sendTextMessage(channelUrl, 'Hello, again!');
 
-            await this.bot.listenForMessages(nickname);
+            // Listen for messages and respond to them
+            await this.bot.listenForMessages(nickname, chatbot);
 
-            // Close the browser
             //await this.bot.close();
         } catch (error) {
             console.error('An error occurred:', error);
@@ -38,11 +48,10 @@ class BotRunner {
         }
     }
 
-    handleResponse(response) {
+    async handleResponse(response) {
         const channelUrl = this.env.get('DISCORD_CHANNEL_URL');
         console.log('Received a response from the chatbot:', response);
-        // This is an example, you should replace 'channelUrl' with actual value
-        this.bot.sendTextMessage(channelUrl, response);
+        await this.bot.sendTextMessage(channelUrl, response);
     }
 }
 

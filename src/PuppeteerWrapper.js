@@ -4,15 +4,15 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 class PuppeteerWrapper {
-    constructor() {
-        // Initialize PuppeteerWrapper properties and dependencies
+    constructor(userDataDir = './browserSession') {
+        this.userDataDir = userDataDir;
         this.browser = null;
         this.page = null;
     }
 
     async init() {
         // Initialize Puppeteer browser instance
-        this.browser = await puppeteer.launch({ headless: false });
+        this.browser = await puppeteer.launch({ headless: false, userDataDir: this.userDataDir });
         this.page = (await this.browser.pages())[0];
     }
 
@@ -51,7 +51,6 @@ class PuppeteerWrapper {
         } catch (e) {
             console.log(e);
         }
-
     }
 
     async typeText(selector, text) {
@@ -94,20 +93,6 @@ class PuppeteerWrapper {
         await this.page.setViewport({ width, height });
     }
 
-
-    async saveCookies(filePath) {
-        const cookies = await this.page.cookies();
-        fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
-    }
-
-
-    async getCookies(filePath) {
-        if (fs.existsSync(filePath)) {
-            const cookies = JSON.parse(fs.readFileSync(filePath));
-            return cookies;
-        }
-    }
-    
     async fillForm(selectorMap) {
         const firstSelector = Object.keys(selectorMap)[0];
         console.log(firstSelector);

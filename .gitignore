@@ -1,6 +1,7 @@
 junk/
 cookies/
-
+browserState/
+browserSession/
 # Logs
 logs
 *.log

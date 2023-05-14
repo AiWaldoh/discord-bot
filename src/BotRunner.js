@@ -2,10 +2,21 @@ const EnvWrapper = require('./EnvWrapper');
 const DiscordPuppeteerBot = require('./DiscordPuppeteerBot');
 const { EventEmitter } = require('events');
 const OpenAIChatBot = require('./OpenAIChatBot');
+const fs = require('fs').promises;
+
 class BotRunner {
     constructor() {
         this.env = new EnvWrapper();
         this.messageEmitter = new EventEmitter();
+    }
+
+    async readFile(filePath) {
+        try {
+            const data = await fs.readFile(filePath, 'utf8');
+            return data;
+        } catch (error) {
+            console.error(`Got an error trying to read the file: ${error.message}`);
+        }
     }
 
     async runBot() {
@@ -17,7 +28,7 @@ class BotRunner {
         // Instantiate the OpenAIChatBot
         let chatbot = new OpenAIChatBot();
         chatbot.set_role(this.env.get("OPENAI_INITIAL_MESSAGE"));
-        const context = this.env.get("OPENAI_CONTEXT");
+        const context = await this.readFile(`prompt.txt`);
 
         chatbot.send_message(context);
 

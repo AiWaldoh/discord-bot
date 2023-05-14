@@ -2,7 +2,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const EnvWrapper = require('./EnvWrapper');
 
 class OpenAIChatBot {
-    constructor(model = "gpt-3.5-turbo", initial_message = "You are a helpful assistant.") {
+    constructor(initial_message = "You are a helpful assistant.", model = "gpt-3.5-turbo") {
         this.env = new EnvWrapper();
         this.configuration = new Configuration({
             apiKey: this.env.get("OPENAI_API_KEY"),
@@ -24,7 +24,7 @@ class OpenAIChatBot {
         this.messages.push({ role: "user", content: message });
     }
 
-    async get_response(temperature = 0.9, presence_penalty = 0, frequency_penalty = 0, n = 1) {
+    async get_response(temperature = 0.7, presence_penalty = 0, frequency_penalty = 0, n = 1) {
         let response;
         try {
             response = await this.openai.createChatCompletion({

@@ -20,7 +20,7 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
         });
         this.messageEmitter.on('message', async message => {
             chatbot.send_message(message);
-            const response = await chatbot.get_response();
+            const response = await chatbot.get_response(1);
             this.messageEmitter.emit('response', response);
         });
 

@@ -60,6 +60,7 @@ class BotRunner {
     }
 
     async handleResponse(response) {
+        //console.log(response);
         const channelUrl = this.env.get('DISCORD_CHANNEL_URL');
         try {
             await this.bot.sendTextMessage(channelUrl, response);

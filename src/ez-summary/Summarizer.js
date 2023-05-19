@@ -24,8 +24,8 @@ class RunApp {
 
     await this.scraper.init();
 
-    wendahAI.send_message("generate a funny 10 word loading message for opening your browser");
-    let loadingMsg = await wendahAI.get_response(0.8);
+    wendahAI.send_message(`generate a funny loading message saying you're opening up your browser to load the domain ${url}`);
+    let loadingMsg = await wendahAI.get_response(1);
     this.messageEmitter.emit('response', loadingMsg);
 
 
@@ -33,8 +33,8 @@ class RunApp {
     //await this.getFunnyLoadingMessageForStatus(`Initializing application...`);
     await this.scraper.goToPage(url);
 
-    wendahAI.send_message("generate a funny 10 word loading message for when you ethically start scraping data");
-    loadingMsg = await wendahAI.get_response(0.8);
+    wendahAI.send_message("generate a funny loading message explaining you are currently scraping the page");
+    loadingMsg = await wendahAI.get_response(1);
     this.messageEmitter.emit('response', loadingMsg);
 
     const data = await this.scraper.scrapeForImportantStuff();
@@ -48,7 +48,7 @@ class RunApp {
     const text = await this.scraper.getTextFromXPath(url, jsonXpaths.xpath);
     console.log(text);
 
-    wendahAI.send_message(`generate a funny 10 word loading message for summarizing the parsed data for ${url}`);
+    wendahAI.send_message(`generate a funny 10 word loading message saying you're summarizing the parsed data for ${url}`);
 
     //wendahAI.send_message(`generate a funny 20 word loading message for summarizing data a la Sherlock Holmes for ${url}.`);
     loadingMsg = await wendahAI.get_response(1);
@@ -57,16 +57,15 @@ class RunApp {
 
     this.chatBot.clear_messages();
     this.chatBot.set_role("You are a summarization AI.")
-    this.chatBot.send_message("comprehensively summarize the following text so it's about 3000 tokens size for an AI to understand:");
+    this.chatBot.send_message("comprehensively summarize the following text so it's maximum 3000 tokens size for an AI to understand:");
     // console.log(text);
     this.chatBot.send_message(text);
     const summary = await this.chatBot.get_response(0.5);
     this.scraper.close();
 
-    wendahAI.send_message(`You are super excited and impressed that you were able to actually parse data from ${url}. Who knew?! Enjoy your new superpower`);
-    loadingMsg = await wendahAI.get_response(0.8);
-    //this.messageEmitter.emit('response', loadingMsg);
+    wendahAI.send_message(`###IMPORTANT### scraped data from ${url}."###DATA### " + ${summary}`);
 
+    loadingMsg = await wendahAI.get_response(0.8);
     return summary;
   }
 

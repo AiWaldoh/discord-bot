@@ -30,7 +30,9 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
                 const summarizer = new Summarizer(this.messageEmitter);
                 try {
                     let summary = await summarizer.summarize(url, chatbot);
-                    this.messageEmitter.emit('response', summary);
+
+                    const myStringWithBackticks = '```' + summary + '```';
+                    this.messageEmitter.emit('response', myStringWithBackticks);
                 } catch (ex) {
                     console.log(ex);
                     this.messageEmitter.emit('response', "Sorry, I couldn't summarize that page. Please try another page.");
@@ -94,7 +96,6 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
     async sendTextMessage(channelUrl, message) {
         //console.log(`sending text message to channel ${channelUrl}`);
         //await this.goto(channelUrl);
-        await this.waitForElement('div[role="textbox"]');
         await this.page.type('div[role="textbox"]', message);
         await this.page.keyboard.press('Enter');
     }

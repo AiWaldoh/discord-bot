@@ -36,6 +36,7 @@ class BotRunner {
 
         await this.bot.init();
 
+
         try {
             // Log in to Discord
             await this.bot.discordLogin(username, password);
@@ -45,24 +46,28 @@ class BotRunner {
             await this.bot.goto(channelUrl);
             //wait for channel to load
             await this.bot.waitForElement('div[role="textbox"]');
-
-            // Send a message
-            //await this.bot.sendTextMessage(channelUrl, 'Hello, again!');
-
             // Listen for messages and respond to them
             await this.bot.listenForMessages(nickname, chatbot);
 
             //await this.bot.close();
         } catch (error) {
             console.error('An error occurred:', error);
+            this.handleResponse("One Moment. I 404 sometimes.");
             process.exit(1);
         }
+
+
     }
 
     async handleResponse(response) {
         const channelUrl = this.env.get('DISCORD_CHANNEL_URL');
-        console.log('Received a response from the chatbot:', response);
-        await this.bot.sendTextMessage(channelUrl, response);
+        try {
+            await this.bot.sendTextMessage(channelUrl, response);
+        } catch (error) {
+            console.error('An error occurred:', error);
+            this.handleResponse("I think I 404'd in my code...");
+        }
+
     }
 }
 

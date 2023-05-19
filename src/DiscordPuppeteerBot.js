@@ -1,5 +1,6 @@
 const PuppeteerWrapper = require('./PuppeteerWrapper');
 
+const Summarizer = require('./ez-summary/Summarizer');
 
 class DiscordPuppeteerBot extends PuppeteerWrapper {
 
@@ -18,10 +19,32 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
                 this.messageEmitter.emit('message', message);
             }
         });
+
         this.messageEmitter.on('message', async message => {
-            chatbot.send_message(message);
-            const response = await chatbot.get_response(1);
-            this.messageEmitter.emit('response', response);
+
+            let command = message.trim().split(" ")[0];
+
+            if (command == "summarize") {
+                console.log("in summarize!");
+                let url = message.trim().split(" ")[1];
+                const summarizer = new Summarizer(this.messageEmitter);
+                try {
+                    let summary = await summarizer.summarize(url, chatbot);
+                    this.messageEmitter.emit('response', summary);
+                } catch (ex) {
+                    console.log(ex);
+                    this.messageEmitter.emit('response', "Sorry, I couldn't summarize that page. Please try another page.");
+                }
+
+
+
+
+            } else {
+                chatbot.send_message(message);
+                const response = await chatbot.get_response(1);
+                this.messageEmitter.emit('response', response);
+            }
+
         });
 
         // Add a MutationObserver in the browser context to listen for new messages
@@ -69,7 +92,7 @@ class DiscordPuppeteerBot extends PuppeteerWrapper {
 
 
     async sendTextMessage(channelUrl, message) {
-        console.log(`sending text message to channel ${channelUrl}`);
+        //console.log(`sending text message to channel ${channelUrl}`);
         //await this.goto(channelUrl);
         await this.waitForElement('div[role="textbox"]');
         await this.page.type('div[role="textbox"]', message);

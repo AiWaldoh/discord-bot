@@ -12,7 +12,7 @@ class PuppeteerWrapper {
 
     async init() {
         // Initialize Puppeteer browser instance
-        this.browser = await puppeteer.launch({ headless: true });
+        this.browser = await puppeteer.launch({ headless: false });
         this.page = (await this.browser.pages())[0];
     }
 

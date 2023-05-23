@@ -64,17 +64,55 @@ class WebScraper {
 
     async getTextFromXPath(url, xpaths) {
         await this.page.goto(url, { waitUntil: 'networkidle0' });
-        const texts = [];
+        const results = [];
         for (const xpath of xpaths) {
             const elements = await this.page.$x(xpath);
             for (const element of elements) {
-                const text = await this.page.evaluate((el) => el.textContent, element);
-                texts.push(text);
+                const tagName = await this.page.evaluate((el) => el.tagName, element);
+                let value;
+                if (tagName === 'A') {
+                    value = await this.page.evaluate((el) => el.getAttribute('href'), element);
+                } else {
+                    value = await this.page.evaluate((el) => el.textContent, element);
+                }
+                results.push({ xpath, value });
             }
         }
 
-        return texts.join(' '); // join the texts into a single string with spaces in between
+        // Sort the results based on the original order of the XPath expressions
+        results.sort((a, b) => {
+            const indexA = xpaths.indexOf(a.xpath);
+            const indexB = xpaths.indexOf(b.xpath);
+            return indexA - indexB;
+        });
+
+        // Extract the values in the desired order
+        const values = results.map((result) => result.value);
+
+        return values.join(' '); // join the values into a single string with spaces in between
     }
+
+
+    async getXpathValue(url, xpaths) {
+        await this.page.goto(url, { waitUntil: 'networkidle0' });
+        const values = [];
+        for (const xpath of xpaths) {
+            const elements = await this.page.$x(xpath);
+            for (const element of elements) {
+                const tagName = await this.page.evaluate((el) => el.tagName, element);
+                if (tagName === 'A') {
+                    const href = await this.page.evaluate((el) => el.getAttribute('href'), element);
+                    values.push(href);
+                } else {
+                    const text = await this.page.evaluate((el) => el.textContent, element);
+                    values.push(text);
+                }
+            }
+        }
+
+        return values.join(' '); // join the values into a single string with spaces in between
+    }
+
 
     async close() {
         await this.browser.close();

@@ -1,7 +1,7 @@
 const WebScraper = require('./WebScraper');
 const OpenAIChatBot = require('./OpenAIChatBot');
 
-const prompt = `The following data is html hierarchy with 4 words of text for elements that contain text. Return me xpath selectors for paragraph and heading tags using descendants syntax with //.
+const prompt = `The following data is html hierarchy from a website article. Each data element contains it's first 4 words. Return xpath selectors for paragraph and heading tags where the 4 words are relevant to summarizing an article from a website. Focus on selectors for paragraphs.
 ###EXAMPLE###
 [{"tag":"main","id":"jump-content","class":"site-content","text":null,"children":[{"tag":"article","id":"","class":"uni-article-wrapper","text":null,"children":[{"tag":"section","id":"","class":"article-hero","text":null,"children":[{"tag":"div","id":"","class":"article-hero__container","text":null,"children":[{"tag":"h1","id":"","class":"article-hero__h1","text":"Being bold on AI","children":[]}]}]}]
 ###RESPONSE###
@@ -11,66 +11,133 @@ const prompt = `The following data is html hierarchy with 4 words of text for el
   ]
 }`;
 
-let model = "gpt-4";
+const promptCTF = `The following data is html hierarchy with elements and the first 4 words of text they contain. Return xpath selectors for all the visible text using descendants syntax (//)
+###EXAMPLE###
+[{"tag":"main","id":"jump-content","class":"site-content","text":null,"children":[{"tag":"article","id":"","class":"uni-article-wrapper","text":null,"children":[{"tag":"section","id":"","class":"article-hero","text":null,"children":[{"tag":"div","id":"","class":"article-hero__container","text":null,"children":[{"tag":"h1","id":"","class":"article-hero__h1","text":"Being bold on AI","children":[]}]}]}]
+###RESPONSE###
+{
+  "xpath": [
+    "//div[@class='article-hero__container']//h1",
+  ]
+}`;
 
+const promptGoogleSearch = `The following data is html hierarchy with elements and words from Google Search Results. Consider those words and return xpath selectors to query title, full url, date and description. the full url is always an anchor tag with attribute href. 
+###EXAMPLE###
+[{"tag":"main","id":"jump-content","class":"site-content","text":null,"children":[{"tag":"article","id":"","class":"uni-article-wrapper","text":null,"children":[{"tag":"section","id":"","class":"article-hero","text":null,"children":[{"tag":"div","id":"","class":"article-hero__container","text":null,"children":[{"tag":"h1","id":"","class":"article-hero__h1","text":"Being bold on AI","children":[]}]}]}]
+###RESPONSE###
+{
+  "xpath": [
+    "//div[@class='article-hero__container']//h1",
+  ]
+}`;
 class RunApp {
-  constructor(messageEmitter) {
+  constructor(messageEmitter, model = 'gpt-4') {
     this.scraper = new WebScraper();
     this.chatBot = new OpenAIChatBot(model);
     this.messageEmitter = messageEmitter;
   }
 
-  async summarize(url, wendahAI) {
-
+  async scrapeWebsite(url) {
     await this.scraper.init();
-
-    wendahAI.send_message(`generate a funny loading message saying you're opening up your browser to load the domain ${url}`);
-    let loadingMsg = await wendahAI.get_response(1);
-    this.messageEmitter.emit('response', loadingMsg);
-
-
     console.log(`Navigating to url: ${url}...`);
-    //await this.getFunnyLoadingMessageForStatus(`Initializing application...`);
     await this.scraper.goToPage(url);
 
-    wendahAI.send_message("generate a funny loading message explaining you are currently scraping the page");
-    loadingMsg = await wendahAI.get_response(1);
-    this.messageEmitter.emit('response', loadingMsg);
+    return await this.scraper.scrapeForImportantStuff();
+  }
+  // async scrapeGoogleSearch(url) {
+  //   await this.scraper.init();
+  //   console.log(`Navigating to url: ${url}...`);
+  //   await this.scraper.goToPage(url);
 
-    const data = await this.scraper.scrapeForImportantStuff();
-
+  //   return await this.scraper.scrapeForGoogleResults();
+  // }
+  async getImportantData(prompt, data) {
     this.chatBot.send_message(prompt);
     this.chatBot.send_message(JSON.stringify(data));
-    const jsonXpaths = JSON.parse(await this.chatBot.get_response(0));
 
+    return JSON.parse(await this.chatBot.get_response(0));
+  }
 
+  async parseData(url, xpath) {
     console.log(`Parsing important data using xpath...`);
-    const text = await this.scraper.getTextFromXPath(url, jsonXpaths.xpath);
-    console.log(text);
+    return await this.scraper.getTextFromXPath(url, xpath);
+  }
 
-    wendahAI.send_message(`generate a funny 10 word loading message saying you're summarizing the parsed data for ${url}`);
-
-    //wendahAI.send_message(`generate a funny 20 word loading message for summarizing data a la Sherlock Holmes for ${url}.`);
-    loadingMsg = await wendahAI.get_response(1);
-    this.messageEmitter.emit('response', loadingMsg);
-
-
+  async getSummary(role, message, text, temperature) {
     this.chatBot.clear_messages();
-    this.chatBot.set_role("You are a summarization AI.")
-    this.chatBot.send_message("comprehensively summarize the following text so it's maximum 3000 tokens size for an AI to understand:");
-    // console.log(text);
+    this.chatBot.set_role(role);
+    this.chatBot.send_message(message);
     this.chatBot.send_message(text);
-    const summary = await this.chatBot.get_response(0.5);
+
+    return await this.chatBot.get_response(temperature);
+  }
+
+  async closeScraper() {
     this.scraper.close();
+  }
 
-    wendahAI.send_message(`###IMPORTANT### scraped data from ${url}."###DATA### " + ${summary}`);
+  async summarize(url) {
+    const data = await this.scrapeWebsite(url);
+    console.log(data);
+    const jsonXpaths = await this.getImportantData(prompt, data);
+    console.log(jsonXpaths);
+    const websiteVisibleText = await this.parseData(url, jsonXpaths.xpath);
+    console.log(websiteVisibleText);
+    const summary = await this.getSummary("You are a summarization AI.", "Comprehensively summarize the following text so it's maximum 3000 tokens size for an AI to understand:", websiteVisibleText, 0.5);
+    console.log(summary);
+    await this.closeScraper();
 
-    loadingMsg = await wendahAI.get_response(0.8);
     return summary;
   }
 
+  async summarizeGoogle(url) {
+    await this.scraper.init();
+    console.log(`scraping ${url}...`);
+    // const data = await this.scrapeGoogleSearch(url);
+    // console.log(`data from ${data}...`);
+    // console.log(`getting xpaths from ${url}...`);
+    // const jsonXpaths = await this.getImportantData(promptGoogleSearch, data);
+    // console.log(jsonXpaths);
+    const jsonXpaths = {
+      "xpath": [
+        "//div[@class='yuRUbf']/a[@href]",
+        "//div[contains(@class, 'VwiC3b')]//span/span[1]",
+        "//div[contains(@class, 'VwiC3b')]//span/span[2]",
+        "//div[contains(@class, 'yuRUbf')]//h3"
+      ]
+    }
+
+    const relevantXpathSiteData = await this.parseData(url, jsonXpaths.xpath);
+    console.log(`website visible text:`);
+    console.log(relevantXpathSiteData);
+    console.log(`getting google results summary`);
+    this.chatBot.set_model('gpt-3.5-turbo');
+    const summary = await this.getSummary("You are a Google Search API.", "You will return the title, link, date and short description for these google results", relevantXpathSiteData, 0);
+    console.log(summary);
+    await this.closeScraper();
+
+    return summary;
+  }
+
+  async summarizeCTF(url) {
+    console.log(`scraping ${url}...`);
+    const data = await this.scrapeWebsite(url);
+    console.log(`data from ${data}...`);
+    console.log(`getting xpaths from ${url}...`);
+    const jsonXpaths = await this.getImportantData(promptCTF, data);
+    console.log(`xpath data:`);
+    console.log(jsonXpaths);
+    const websiteVisibleText = await this.parseData(url, jsonXpaths.xpath);
+    console.log(`website visible text:`);
+    console.log(websiteVisibleText);
+    console.log(`getting summary`);
+    const summary = await this.getSummary("You are an ethical hacker doing a CTF. You will return important information such as versions, software name, if there's a form, etc. Mention known vulnerabilities and finally give a brief summary of the website's technologies.", "Summarize the information relevant to an ethical hacker doing a pentest from this website", websiteVisibleText, 0);
+    console.log(summary);
+    await this.closeScraper();
+
+    return summary;
+  }
 }
 
 module.exports = RunApp;
-
 

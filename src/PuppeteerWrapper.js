@@ -11,8 +11,8 @@ class PuppeteerWrapper {
     }
 
     async init() {
-        // Initialize Puppeteer browser instance
-        this.browser = await puppeteer.launch({ headless: true });
+        // Initialize Puppeteer browser instance , args: ['--no-sandbox', '--disable-setuid-sandbox']
+        this.browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         this.page = (await this.browser.pages())[0];
     }
 

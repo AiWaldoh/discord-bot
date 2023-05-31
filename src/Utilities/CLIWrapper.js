@@ -2,7 +2,7 @@ const pty = require('node-pty');
 const util = require('util');
 const events = require('events');
 
-class CLI {
+class CLIWrapper {
     constructor() {
         this.shell = 'bash';
     }
@@ -17,7 +17,8 @@ class CLI {
                 env: process.env
             });
 
-            let output = '';
+            //SUCCESS
+            let output = `ok$ ${command}\n`;
             let hasExited = false;
 
             ptyProcess.on('data', (data) => {
@@ -29,20 +30,21 @@ class CLI {
                 if (exitCode === 0) {
                     resolve(output);
                 } else {
-                    reject(new Error(`Command "${command}" exited with code ${exitCode}`));
+                    reject(new Error(`error$ "${command}" \n ${exitCode}`));
                 }
             });
 
+            //ERROR
             ptyProcess.on('error', (error) => {
                 if (!hasExited && error.message !== 'read EIO') {
-                    reject(new Error(`Failed to run command "${command}". Error: ${error.message}`));
+                    reject(new Error(`error$ "${command}" \n ${error.message}`));
                 } else if (error.message === 'read EIO') {
                     resolve(output);
                 }
             });
 
 
-            // Reject the promise if command takes longer than 5 seconds
+            // Reject the promise if command takes longer than X seconds
             setTimeout(() => {
                 if (!hasExited) {
                     reject(new Error(`Command "${command}" taking longer than 30 seconds to execute`));
@@ -53,4 +55,4 @@ class CLI {
 }
 
 
-module.exports = CLI;
+module.exports = CLIWrapper;

@@ -1,0 +1,74 @@
+Summary for https://www.google.ca/search?q=capthca: ```1. Title: How CAPTCHAs work | What does CAPTCHA mean?
+Link: https://www.cloudflare.com/learning/bots/how-captchas-work/#:~:text=What%20is%20a%20CAPTCHA%3F,reCAPTCHA%20tests%20on%20the%20Internet.
+Date: N/A
+Description: This article explains what CAPTCHAs are, how they work, and why they are used.
+
+2. Title: What is CAPTCHA? - Google Workspace Admin Help
+Link: https://support.google.com/a/answer/1217728?hl=en#:~:text=CAPTCHA%20(Completely%20Automated%20Public%20Turing,known%20as%20challenge%2Dresponse%20authentication.
+Date: N/A
+Description: This article from Google explains what CAPTCHAs are, how they work, and how they are used in Google Workspace.
+
+3. Title: What to Do When CAPTCHAs Won't Work - LiveAbout
+Link: https://www.liveabout.com/what-to-do-when-captchas-dont-work-897057#:~:text=If%20the%20CAPTCHA%20shows%20both,exactly%20as%20they're%20shown.
+Date: N/A
+Description: This article provides tips on what to do when CAPTCHAs are not working properly.
+
+4. Title: Solved: ReCAPTCHA Not Working In Chrome, Firefox, Or Any Browser
+Link: https://meetanshi.com/blog/recaptcha-not-working/#:~:text=Why%20is%20reCAPTCHA%20blocking%20me,address%20to%20solve%20the%20issue.
+Date: N/A
+Description: This article provides solutions to common issues with reCAPTCHA not working in various browsers.
+
+5. Title: What is CAPTCHA? 
+Link: https://www.imperva.com/learn/application-security/what-is-captcha/#:~:text=Modern%20CAPTCHAs%20fall%20into%20three,image%2Dbased%2C%20and%20audio.
+Date: N/A
+Description: This article explains what CAPTCHAs are, how they work, and the different types of CAPTCHAs.
+
+6. Title: CAPTCHA - Wikipedia
+Link: https://en.wikipedia.org/wiki/CAPTCHA
+Date: N/A
+Description: This Wikipedia article provides an overview of CAPTCHAs, their history, and their use in online security.
+
+7. Title: The Official CAPTCHA Site
+Link: http://www.captcha.net/
+Date: N/A
+Description: This is the official website for CAPTCHA, providing information on CAPTCHAs and their use in online security.
+
+8. Title: reCAPTCHA
+Link: https://www.google.com/recaptcha/about/
+Date: N/A
+Description: This is the official website for reCAPTCHA, providing information on the service and its use in online security.
+
+9. Title: What Does CAPTCHA Mean? | CAPTCHA Types & Examples
+Link: https://www.imperva.com/learn/application-security/what-is-captcha/
+Date: N/A
+Description: This article explains what CAPTCHAs are, how they work, and the different types of CAPTCHAs.
+
+10. Title: What is CAPTCHA? Types and Examples
+Link: https://www.wallarm.com/what/what-is-captcha-types-and-examples
+Date: N/A
+Description: This article explains what CAPTCHAs are, how they work, and the different types of CAPTCHAs.
+
+11. Title: How Does CAPTCHA Work to Improve Web Security?
+Link: https://www.techtarget.com/searchsecurity/definition/CAPTCHA
+Date: N/A
+Description: This article explains how CAPTCHAs work to improve web security.
+
+12. Title: What is CAPTCHA?
+Link: https://www.ibm.com/topics/captcha
+Date: N/A
+Description: This article explains what CAPTCHAs are, how they work, and their use in online security.
+
+13. Title: CAPTCHA
+Link: https://www.fortinet.com/resources/cyberglossary/captcha
+Date: N/A
+Description: This article provides a definition of CAPTCHA and its use in online security.
+
+14. Title: Worker's FAQ - 2Captcha
+Link: https://2captcha.com/support/faq/worker#:~:text=To%20start%20your%20online%20job,to%20earn%20money%20solving%20captchas.
+Date: N/A
+Description: This article provides information on how to become a worker for 2Captcha, a service that pays users to solve CAPTCHAs.
+
+15. Title: What is reCAPTCHA? - Google Support
+Link: https://support.google.com/recaptcha/answer/6080904?hl=en#:~:text=reCAPTCHA%20is%20a%20free%20service,malicious%20software%20to%20figure%20out.
+Date: N/A
+Description: This article from Google explains what reCAPTCHA is, how it works, and its use in online security.```

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const baseBot = require("../OpenAIChatBot");
+const baseBot = require("./OpenAIWrapper");
 
 let default_model = "gpt-4";
 let default_message = `You are a contextual text mastermind and a linux command genius. You will behave in 2 different manners depending on the context. 
@@ -16,16 +16,16 @@ Example #3:
 User:what command should I use to create a directory?
 Answer: To create a directory, use the mkdir command`
 
-class CTFAIBot extends baseBot {
+class CTFBot extends baseBot {
     constructor() {
         super(default_message, default_model); // Call the base class's constructor
         this.model = default_model;
         this.initialMessage = default_message;
     }
 
-    async processMessage(message) {
+    async processMessage(message, temperature = 0) {
         this.send_message(message);
-        return await this.get_response();
+        return await this.get_response(temperature);
         // Add custom functionality here
         // e.g. make an API call to OpenAI using this.model and message
         // process the result and return it
@@ -53,4 +53,4 @@ class CTFAIBot extends baseBot {
         return inputString.replace(regex, replacement);
     }
 }
-module.exports = CTFAIBot;
+module.exports = CTFBot;

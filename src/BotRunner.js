@@ -1,81 +1,48 @@
-const EnvWrapper = require('./EnvWrapper');
-const DiscordPuppeteerBot = require('./DiscordPuppeteerBot');
+const EnvironmentManager = require('./Managers/EnvironmentManager');
+const ChatBotManager = require('./Managers/ChatBotManager');
+const DiscordManager = require('./Managers/DiscordManager');
+const SoldierAgentManager = require('./Managers/SoldierAgentManager');
 const { EventEmitter } = require('events');
-const OpenAIChatBot = require('./OpenAIChatBot');
-const fs = require('fs').promises;
+
 class BotRunner {
     constructor() {
-        this.env = new EnvWrapper();
-        this.messageEmitter = new EventEmitter();
+        this.envManager = new EnvironmentManager();
+        this.chatBotManager = new ChatBotManager();
+        this.discordManager = new DiscordManager('https://discord.com', new EventEmitter(), this.chatBotManager.getChatBot(), this.envManager.getEnvVariable('ADMIN_DISCORD_ID'));
+        this.soldierAgentManager = new SoldierAgentManager();
+        this.messageEmitter = this.discordManager.getMessageEmitter(); // Assuming you have a getMessageEmitter method in DiscordManager
 
-        //SECURITY MEASURE FOR CTF MODE. NEED COMPACT MODE WITH DISPLAY PICS ON. MANUALLY DO THIS FOR NOW
-        this.adminId = this.env.get("ADMIN_DISCORD_ID");
-
-        this.username = this.env.get('DISCORD_EMAIL');
-        this.password = this.env.get('DISCORD_PASSWORD');
-        this.channelUrl = this.env.get('DISCORD_CHANNEL_URL');
-        this.nickname = this.env.get("DISCORD_NICKNAME");
-        this.role = this.env.get("OPENAI_INITIAL_MESSAGE");
+        this.setupCommandListener();
     }
 
+    setupCommandListener() {
+        this.messageEmitter.on('command', async (command) => {
+            try {
+                const result = await this.soldierAgentManager.executeTask(command);
+                console.log('Task execution result:', result);
+            } catch (error) {
+                console.error('Error executing task:', error);
+            }
+        });
+    }
+    // Add the handleResponse method
+    async handleResponse(response) {
+        await this.discordManager.handleResponse(response);
+    }
     async runBot() {
-        const cookiesPath = './browserState/discord-data.json';
-
         try {
-            const chatbot = await this.initializeChatBot();
-            this.puppeteer_bot = new DiscordPuppeteerBot('https://discord.com', cookiesPath, this.messageEmitter, chatbot, this.adminId);
-            await this.logIntoDiscord();
-            await this.goToChannel();
-            await this.startListeningForMessages(chatbot);
+            await this.chatBotManager.initialize(this.envManager.getEnvVariable('OPENAI_INITIAL_MESSAGE'), 'prompt.txt');
+            await this.discordManager.logIntoDiscord(this.envManager.getEnvVariable('DISCORD_EMAIL'), this.envManager.getEnvVariable('DISCORD_PASSWORD'));
+            await this.discordManager.goToChannel(this.envManager.getEnvVariable('DISCORD_CHANNEL_URL'));
+
+            //listens in discord channel and replies to messages
+            await this.discordManager.startListeningForMessages(this.envManager.getEnvVariable('DISCORD_NICKNAME'));
         } catch (error) {
             console.error('An error occurred:', error);
-            this.handleResponse("One Moment. I 404 sometimes.");
+            await this.discordManager.handleResponse("One Moment. I 404 sometimes.");
             process.exit(1);
         }
     }
-
-    async initializeChatBot() {
-        let chatbot = new OpenAIChatBot();
-        chatbot.set_role(this.role);
-        const context = await this.readFile(`prompt.txt`);
-        chatbot.send_message(context);
-        return chatbot;
-    }
-
-    async logIntoDiscord() {
-        await this.puppeteer_bot.init();
-        await this.puppeteer_bot.discordLogin(this.username, this.password);
-        console.log(`logged in!`);
-    }
-
-    async goToChannel() {
-        await this.puppeteer_bot.goto(this.channelUrl);
-        await this.puppeteer_bot.waitForElement('div[role="textbox"]');
-        console.log(`channel loaded!`);
-    }
-
-    async startListeningForMessages(chatbot) {
-        await this.puppeteer_bot.listenForMessages(this.nickname, chatbot);
-    }
-
-    async handleResponse(response) {
-        try {
-            await this.puppeteer_bot.sendTextMessage(response);
-        } catch (error) {
-            console.error('An error occurred:', error);
-            // Don't call handleResponse here, it might create an infinite loop
-        }
-    }
-
-    async readFile(filePath) {
-        try {
-            const data = await fs.readFile(filePath, 'utf8');
-            return data;
-        } catch (error) {
-            console.error(`Got an error trying to read the file: ${error.message}`);
-        }
-    }
-
 }
 
 module.exports = BotRunner;

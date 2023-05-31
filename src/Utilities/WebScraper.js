@@ -28,7 +28,7 @@ class WebScraper {
                 const extractTextFromChild = (childNode) => {
 
                     // Only allow p, span, h1, h2, h3, h4, h5, h6 and other tags that contain text.
-                    const allowedTags = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'b', 'i', 'big', 'cite', 'details', 'summary', 'caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'form', 'input', 'label', 'legend', 'option', 'output', 'select', 'textarea'];
+                    const allowedTags = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'b', 'i', 'big', 'cite', 'details', 'summary', 'caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'form'];
                     if (!allowedTags.includes(childNode.tagName.toLowerCase())) {
                         return null;
                     }

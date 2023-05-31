@@ -1,21 +1,17 @@
-
-require('dotenv').config();
 const { Configuration, OpenAIApi } = require("openai");
+const EnvWrapper = require('../Utilities/EnvWrapper');
 
-let default_model = "gpt-3.5-turbo";
-let default_message = "You are an AI capable of only responding in valid json format.###Example###{question: \"Hi, how can I help you?\"}"
-
-class OpenAIChatBot {
-    constructor(model = default_model, initial_message = default_message) {
-
+class OpenAIWrapper {
+    constructor(initial_message = "You are a helpful assistant.", model = "gpt-3.5-turbo") {
+        this.env = new EnvWrapper();
         this.model = model;
         this.messages = [{ role: "system", content: initial_message }];
-        this.openai = new OpenAIApi(new Configuration({
-            apiKey: process.env.OPENAI_API_KEY,
-        }));
         this.prompt_tokens_used = [];
         this.completion_tokens_used = [];
         this.total_tokens_used = [];
+        this.openai = new OpenAIApi(new Configuration({
+            apiKey: process.env.OPENAI_API_KEY,
+        }));
     }
 
     set_role(initial_message) {
@@ -27,7 +23,7 @@ class OpenAIChatBot {
         this.messages.push({ role: "user", content: message });
     }
 
-    async get_response(temperature = 0.7) {
+    async get_response(temperature = 0.7, presence_penalty = 0, frequency_penalty = 0, n = 1) {
         let response;
         try {
             response = await this.openai.createChatCompletion({
@@ -39,6 +35,7 @@ class OpenAIChatBot {
             this.prompt_tokens_used.push(usage.prompt_tokens);
             this.completion_tokens_used.push(usage.completion_tokens);
             this.total_tokens_used.push(usage.total_tokens);
+            console.log(response.data.choices);
             this.messages.push({ role: "assistant", content: response.data.choices[0].message.content });
 
             return response.data.choices[0].message.content;
@@ -53,7 +50,7 @@ class OpenAIChatBot {
     }
 
     clear_messages() {
-        this.messages = [{ role: "system", content: default_message }];
+        this.messages = [{ role: "system", content: "You are a helpful assistant." }];
         this.prompt_tokens_used = [];
         this.completion_tokens_used = [];
         this.total_tokens_used = [];
@@ -79,8 +76,6 @@ class OpenAIChatBot {
     get_model() {
         return this.model;
     }
-
 }
 
-module.exports = OpenAIChatBot;
-
+module.exports = OpenAIWrapper;
